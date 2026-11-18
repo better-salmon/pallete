@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  DARK_SHADES,
   FORMULA_KEY_LIGHTNESS,
   FORMULAS,
   LADDER_500_LIGHTNESS,
@@ -254,6 +255,21 @@ function KeyPicker({
 /** How the key's lightness relates to what the selected formula expects. */
 function LightnessHint({ value, formula }: { value: string; formula: Formula }) {
   const lightness = oklabLightness(value).toFixed(2);
+
+  if (formula === "vivid-dark") {
+    const top = LADDER_ENDS.top;
+    const floor = DARK_SHADES[700];
+    const inside = oklabLightness(value) > floor && oklabLightness(value) < top;
+    return (
+      <span
+        className={inside ? "key-picker__range" : "key-picker__range key-picker__range--out"}
+        title={`vivid-dark keeps the key exactly at 500, eases the tints toward L ${top} like vivid, and pins 700 / 800 / 900 at L ${DARK_SHADES[700]} / ${DARK_SHADES[800]} / ${DARK_SHADES[900]} as dark-mode surfaces`}
+      >
+        L {lightness} · key kept · ends {top} / {DARK_SHADES[900]}
+        {inside ? "" : ` · below ${floor} or above ${top}, steps fall out of order`}
+      </span>
+    );
+  }
 
   if (formula === "perceptual-v2" || formula === "vivid" || formula === "bold") {
     const { top, bottom } = LADDER_ENDS;

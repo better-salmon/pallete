@@ -1,5 +1,6 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import {
+  DARK_SHADES,
   FORMULAS,
   LADDER_500_LIGHTNESS,
   LADDER_ENDS,
@@ -65,6 +66,8 @@ const boldCap = (l: number, h: number) =>
 const CAPTIONS: Record<Formula, string> = {
   vivid:
     "perceptual-v2's key and pinned ends, with chroma pushed off v2's straight lines (the thin tent) toward the outer lines: the room this key has in sRGB. Tints go up to half-way there and ease toward white; shades take all of it by 800. Hue drifts too, which this plane cannot show: compare the yellow and blue strips.",
+  "vivid-dark":
+    "vivid for a dark UI: the same key, tints and roof (the outer line above the key), but the shades are rebuilt as dark-mode surfaces. 700, 800 and 900 are pinned at L 0.27, 0.22 and 0.18 for every key and sit on v2's straight line to black, with none of vivid's extra chroma; 600 is halfway from the key to 700. In dark mode those three are page, card and fill; 50–300 become text.",
   bold: "perceptual-v2's frame — key kept, ends pinned at 0.97 and 0.25 — with chroma that bows out past the straight lines (the thin tent) toward the dashed curve, bold's own estimate of the sRGB edge at the key's hue. It stays between 85% and 2× of the straight-line chroma, so where the estimate is too cautious the dots sit just past the dashed curve. Hue turns too: toward yellow-green as steps lighten, away as they darken, so shades deepen instead of greying.",
   accent:
     "Two straight mixes in sRGB: tints slide toward white, shades toward the ink #16171e. A straight line in sRGB bends in OKLCH, so the dots trace curves.",
@@ -307,16 +310,14 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
    * channels: the roof white → brightest undiluted key → key, and the richest shade line.
    * Drawn unclamped in chroma, so the plot clips them at its right edge.
    */
-  const vividLimits = () => {
+  const vividLimits = (withShades: boolean) => {
     const [r, g, b] = srgbToLinear(hexToSrgb(keyHex));
     const top = Math.cbrt(Math.max(r, g, b));
     const grey = Math.min(r, g, b) / (0.25 * r + 0.55 * g + 0.2 * b);
     const px = (c: number) => M.left + (c / cmax) * PW;
     const rich = keyColor.c * (1 + Math.min(0.5, Number.isFinite(grey) ? grey : 0));
-    return (
-      `M ${px(0)} ${y(1)} L ${px(keyColor.c / top)} ${y(keyColor.l / top)} L ${key.x} ${key.y} ` +
-      `M ${px(rich)} ${key.y} L ${px(0)} ${y(0)}`
-    );
+    const roof = `M ${px(0)} ${y(1)} L ${px(keyColor.c / top)} ${y(keyColor.l / top)} L ${key.x} ${key.y}`;
+    return withShades ? `${roof} M ${px(rich)} ${key.y} L ${px(0)} ${y(0)}` : roof;
   };
 
   const cTicks = [0, cmax / 2, cmax];
@@ -434,14 +435,25 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
             )}
           </>
         )}
-        {(formula === "perceptual-v2" || formula === "vivid" || formula === "bold") && (
+        {(formula === "perceptual-v2" ||
+          formula === "vivid" ||
+          formula === "vivid-dark" ||
+          formula === "bold") && (
           <>
-            {[LADDER_ENDS.top, LADDER_ENDS.bottom].map((l) => (
+            {(formula === "vivid-dark"
+              ? [LADDER_ENDS.top, DARK_SHADES[700], DARK_SHADES[800], DARK_SHADES[900]]
+              : [LADDER_ENDS.top, LADDER_ENDS.bottom]
+            ).map((l) => (
               <g key={l}>
                 <line x1={M.left} x2={W - M.right} y1={y(l)} y2={y(l)} className="plot__ladder" />
-                <text x={W - M.right} y={y(l) - 4} className="plot__note" textAnchor="end">
-                  pinned {l}
-                </text>
+                {/* the three dark pins sit too close for a label each */}
+                {(l === LADDER_ENDS.top || formula !== "vivid-dark" || l === DARK_SHADES[700]) && (
+                  <text x={W - M.right} y={y(l) - 4} className="plot__note" textAnchor="end">
+                    {formula === "vivid-dark" && l !== LADDER_ENDS.top
+                      ? `pinned ${DARK_SHADES[700]} / ${DARK_SHADES[800]} / ${DARK_SHADES[900]}`
+                      : `pinned ${l}`}
+                  </text>
+                )}
               </g>
             ))}
             {formula === "perceptual-v2" ? (
@@ -449,9 +461,9 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
             ) : (
               <>
                 <path d={tent(keyColor.l)} className="plot__guide plot__guide--reference" />
-                {formula === "vivid" ? (
+                {formula === "vivid" || formula === "vivid-dark" ? (
                   <path
-                    d={vividLimits()}
+                    d={vividLimits(formula === "vivid")}
                     className="plot__guide"
                     clipPath={`url(#area-${formula})`}
                   />
