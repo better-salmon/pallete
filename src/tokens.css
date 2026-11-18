@@ -1,0 +1,42 @@
+/* Color primitives — Figma "Offers" › primitives (node 2821:152). */
+:root {
+  /* neutral — поверхности: фон, карточки, поля */
+  --neutral-50: #fcf8f1;
+  --neutral-100: #f3ede2;
+  --neutral-200: #e2d9cb;
+  --neutral-300: #c6bdae;
+  --neutral-400: #aaa192;
+  --neutral-500: #918878;
+  --neutral-600: #7b7365;
+  --neutral-700: #60594d;
+  --neutral-800: #474238;
+  --neutral-900: #2f2a23;
+
+  /* accent — акцент */
+  --accent-50: #fff6f5;
+  --accent-100: #ffe7e4;
+  --accent-200: #fed0c9;
+  --accent-300: #feafa4;
+  --accent-400: #fd8f80;
+  --accent-500: #fd715e;
+  --accent-600: #d96354;
+  --accent-700: #ad5248;
+  --accent-800: #85423d;
+  --accent-900: #5d3332;
+
+  /* brand — бренд */
+  --brand-50: #f2f8f8;
+  --brand-100: #dceeef;
+  --brand-200: #b7e1e1;
+  --brand-300: #73d2d3;
+  --brand-400: #2dbcbe;
+  --brand-500: #148385;
+  --brand-600: #0d7677;
+  --brand-700: #066365;
+  --brand-800: #045556;
+  --brand-900: #034b4c;
+
+  /* page chrome used by the palette sheet */
+  --sheet-bg: #fff;
+  --sheet-ink: #16161e;
+}
