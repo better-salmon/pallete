@@ -226,8 +226,13 @@ code {
   font: inherit;
 }
 
+.palette-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .add-palette {
-  align-self: flex-start;
   border-style: dashed;
   border-color: var(--group-accent);
   color: var(--group-accent);

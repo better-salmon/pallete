@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   FORMULA_KEY_LIGHTNESS,
   FORMULAS,
@@ -10,29 +10,47 @@ import {
 import { oklabLightness } from "./oklch.ts";
 import { FormulaExplainer } from "./FormulaExplainer.tsx";
 import { LivePalette, Palette } from "./Palette.tsx";
+import { loadSavedState, saveState, type SavedPalette, type SavedState } from "./savedPalettes.ts";
 
 /** Scales with hand-picked Figma tokens in tokens.css; each has its own formula. */
 const FIGMA_SCALES: Formula[] = ["neutral", "accent", "brand"];
 
 /** A generated scale. `id` stays fixed so renaming doesn't remount the palette. */
-type Generated = { id: string; name: string; key: string; formula: Formula };
+type Generated = SavedPalette & { id: string };
 
 let lastId = 0;
 const nextId = () => `scale-${++lastId}`;
 
 /** Starting names, keys and formulas for the generated scales; all can be changed. */
-const DEFAULT_GENERATED: Generated[] = [
-  { id: nextId(), name: "blue", key: "#3d8fe4", formula: "vivid" },
-  { id: nextId(), name: "green", key: "#45b164", formula: "vivid" },
-  { id: nextId(), name: "violet", key: "#9572e7", formula: "vivid" },
-];
+const DEFAULT_STATE: SavedState = {
+  globalKey: "#3d8fe4",
+  palettes: [
+    { name: "blue", key: "#3d8fe4", formula: "vivid" },
+    { name: "green", key: "#45b164", formula: "vivid" },
+    { name: "violet", key: "#9572e7", formula: "vivid" },
+  ],
+};
+
+const withIds = (palettes: SavedPalette[]): Generated[] =>
+  palettes.map((palette) => ({ ...palette, id: nextId() }));
 
 /** The name to show and copy; a blank name falls back to "untitled". */
 const displayName = (name: string) => name.trim() || "untitled";
 
 export function App() {
-  const [generated, setGenerated] = useState(DEFAULT_GENERATED);
-  const [globalKey, setGlobalKey] = useState(DEFAULT_GENERATED[0].key);
+  // Read once on mount: the palettes and global key saved by the last visit, else the defaults.
+  const [initial] = useState(() => loadSavedState() ?? DEFAULT_STATE);
+  const [generated, setGenerated] = useState(() => withIds(initial.palettes));
+  const [globalKey, setGlobalKey] = useState(initial.globalKey);
+
+  useEffect(() => {
+    saveState({ globalKey, palettes: generated.map(({ id: _id, ...palette }) => palette) });
+  }, [generated, globalKey]);
+
+  const reset = () => {
+    setGenerated(withIds(DEFAULT_STATE.palettes));
+    setGlobalKey(DEFAULT_STATE.globalKey);
+  };
 
   const update = (id: string, patch: Partial<Generated>) =>
     setGenerated((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
@@ -112,9 +130,19 @@ export function App() {
             }
           />
         ))}
-        <button type="button" className="sheet-button add-palette" onClick={addScale}>
-          + Add palette
-        </button>
+        <div className="palette-actions">
+          <button type="button" className="sheet-button add-palette" onClick={addScale}>
+            + Add palette
+          </button>
+          <button
+            type="button"
+            className="sheet-button"
+            title="Restore the default blue, green and violet palettes"
+            onClick={reset}
+          >
+            Reset palettes
+          </button>
+        </div>
       </Group>
 
       <Group
