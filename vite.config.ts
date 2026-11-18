@@ -2,6 +2,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  // Relative asset URLs so the build works under /pallete/ on GitHub Pages.
+  base: "./",
   plugins: [react()],
   staged: {
     "*": "vp check --fix",
