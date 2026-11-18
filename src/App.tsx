@@ -14,38 +14,46 @@ import { LivePalette, Palette } from "./Palette.tsx";
 /** Scales with hand-picked Figma tokens in tokens.css; each has its own formula. */
 const FIGMA_SCALES: Formula[] = ["neutral", "accent", "brand"];
 
-type Generated = { key: string; formula: Formula };
+/** A generated scale. `id` stays fixed so renaming doesn't remount the palette. */
+type Generated = { id: string; name: string; key: string; formula: Formula };
 
-/** Starting keys and formulas for the generated scales; both can be changed. */
-const DEFAULT_GENERATED: Record<string, Generated> = {
-  blue: { key: "#3d8fe4", formula: "vivid" },
-  green: { key: "#45b164", formula: "vivid" },
-  violet: { key: "#9572e7", formula: "vivid" },
-};
+let lastId = 0;
+const nextId = () => `scale-${++lastId}`;
+
+/** Starting names, keys and formulas for the generated scales; all can be changed. */
+const DEFAULT_GENERATED: Generated[] = [
+  { id: nextId(), name: "blue", key: "#3d8fe4", formula: "vivid" },
+  { id: nextId(), name: "green", key: "#45b164", formula: "vivid" },
+  { id: nextId(), name: "violet", key: "#9572e7", formula: "vivid" },
+];
+
+/** The name to show and copy; a blank name falls back to "untitled". */
+const displayName = (name: string) => name.trim() || "untitled";
 
 export function App() {
   const [generated, setGenerated] = useState(DEFAULT_GENERATED);
-  const [globalKey, setGlobalKey] = useState(DEFAULT_GENERATED.blue.key);
+  const [globalKey, setGlobalKey] = useState(DEFAULT_GENERATED[0].key);
 
-  const update = (scale: string, patch: Partial<Generated>) =>
-    setGenerated((prev) => ({ ...prev, [scale]: { ...prev[scale], ...patch } }));
+  const update = (id: string, patch: Partial<Generated>) =>
+    setGenerated((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
 
   /** Adds a scale named custom-N, starting from the global key and the vivid formula. */
-  const addScale = () =>
+  const addScale = () => {
+    const id = nextId();
     setGenerated((prev) => {
+      const names = new Set(prev.map((g) => g.name));
       let n = 1;
-      while (`custom-${n}` in prev) n++;
-      return { ...prev, [`custom-${n}`]: { key: globalKey, formula: "vivid" } };
+      while (names.has(`custom-${n}`)) n++;
+      return [...prev, { id, name: `custom-${n}`, key: globalKey, formula: "vivid" }];
     });
+  };
 
-  const removeScale = (scale: string) => setGenerated(({ [scale]: _removed, ...rest }) => rest);
+  const removeScale = (id: string) => setGenerated((prev) => prev.filter((g) => g.id !== id));
 
   /** Gives every generated scale the same key; each keeps its own formula. */
   const setAllKeys = (key: string) => {
     setGlobalKey(key);
-    setGenerated((prev) =>
-      Object.fromEntries(Object.entries(prev).map(([scale, g]) => [scale, { ...g, key }])),
-    );
+    setGenerated((prev) => prev.map((g) => ({ ...g, key })));
   };
 
   return (
@@ -78,21 +86,28 @@ export function App() {
             }
           />
         ))}
-        <GlobalKeyPicker value={globalKey} scales={Object.keys(generated)} onChange={setAllKeys} />
-        {Object.entries(generated).map(([scale, { key, formula }]) => (
+        <GlobalKeyPicker
+          value={globalKey}
+          scales={generated.map((g) => displayName(g.name))}
+          onChange={setAllKeys}
+        />
+        {generated.map(({ id, name, key, formula }) => (
           <LivePalette
-            key={scale}
-            name={scale}
+            key={id}
+            id={id}
+            name={displayName(name)}
+            editableName={name}
+            onRename={(next) => update(id, { name: next })}
             keyColor={key}
             formula={formula}
             aside={
               <KeyPicker
-                scale={scale}
+                scale={displayName(name)}
                 value={key}
                 formula={formula}
-                onKeyChange={(next) => update(scale, { key: next })}
-                onFormulaChange={(next) => update(scale, { formula: next })}
-                onRemove={() => removeScale(scale)}
+                onKeyChange={(next) => update(id, { key: next })}
+                onFormulaChange={(next) => update(id, { formula: next })}
+                onRemove={() => removeScale(id)}
               />
             }
           />

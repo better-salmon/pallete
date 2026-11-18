@@ -116,6 +116,28 @@ body {
   color: var(--sheet-ink);
 }
 
+.palette__name {
+  field-sizing: content;
+  min-width: 4ch;
+  margin: 0 -6px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.palette__name:hover {
+  border-color: var(--sheet-line);
+}
+
+.palette__name:focus {
+  border-color: var(--group-accent, var(--sheet-ink));
+  outline: none;
+  background: var(--sheet-bg);
+}
+
 .sheet-button {
   height: 34px;
   padding: 0 12px;

@@ -15,6 +15,11 @@ export type Step = (typeof STEPS)[number];
 
 type PaletteProps = {
   name: string;
+  /** Unique id for the heading; defaults to the name. */
+  id?: string;
+  /** Raw text of an editable name; with `onRename`, the title becomes a text field. */
+  editableName?: string;
+  onRename?: (name: string) => void;
   /** CSS color for each step, e.g. a token or a ramp.css variable. */
   color: (step: Step) => string;
   /** Extra controls shown next to the title. */
@@ -23,19 +28,42 @@ type PaletteProps = {
   style?: CSSProperties;
 };
 
-export function Palette({ name, color, aside, className, style }: PaletteProps) {
-  const titleId = `palette-${name}-${className ?? "static"}`;
+export function Palette({
+  name,
+  id,
+  editableName,
+  onRename,
+  color,
+  aside,
+  className,
+  style,
+}: PaletteProps) {
+  const titleId = `palette-${id ?? name}-${className ?? "static"}`;
+  const editable = onRename !== undefined;
   const stepsRef = useRef<HTMLUListElement>(null);
 
   return (
     <section
       className={className ? `palette ${className}` : "palette"}
-      aria-labelledby={titleId}
+      aria-labelledby={editable ? undefined : titleId}
+      aria-label={editable ? name : undefined}
       style={style}
     >
       <header className="palette__header">
         <h3 className="palette__title" id={titleId}>
-          {name}
+          {editable ? (
+            <input
+              className="palette__name"
+              value={editableName ?? name}
+              placeholder="untitled"
+              size={Math.max((editableName ?? name).length, 8)}
+              spellCheck={false}
+              aria-label="Palette name"
+              onChange={(event) => onRename(event.target.value)}
+            />
+          ) : (
+            name
+          )}
         </h3>
         <CopyJsonButton name={name} stepsRef={stepsRef} />
         {aside}
@@ -114,23 +142,19 @@ function CopyJsonButton({
 
 /** A palette computed live by one ramp.css formula from a single 500 key color. */
 export function LivePalette({
-  name,
   keyColor,
   formula,
-  aside,
-}: {
-  name: string;
+  ...rest
+}: Pick<PaletteProps, "name" | "id" | "editableName" | "onRename" | "aside"> & {
   keyColor: string;
   formula: Formula;
-  aside?: ReactNode;
 }) {
   return (
     <Palette
-      name={name}
+      {...rest}
       className={`ramp ramp--${formula}`}
       style={{ "--ramp-key": keyColor } as CSSProperties}
       color={(step) => `var(--ramp-${step})`}
-      aside={aside}
     />
   );
 }
