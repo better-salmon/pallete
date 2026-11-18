@@ -650,3 +650,194 @@ code {
     font-size: 11px;
   }
 }
+
+/* ------------------------------------------------------------ page nav */
+
+.site-nav {
+  display: flex;
+  gap: 4px;
+  padding: 24px 56px 0;
+}
+
+.site-nav__link {
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--sheet-muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-nav__link:hover {
+  color: var(--sheet-ink);
+}
+
+.site-nav__link[aria-current="page"] {
+  background: var(--sheet-ink);
+  color: var(--sheet-bg);
+}
+
+/* ------------------------------------------------- components page */
+
+.role-pickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px 32px;
+}
+
+.role-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.role-picker__header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.role-picker__name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.role-picker__note {
+  font-size: 13px;
+  color: var(--sheet-muted);
+}
+
+.role-picker__strip {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  list-style: none;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+
+.specimens {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.specimen-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.specimen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.specimen__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.specimen__title {
+  margin: 0;
+  color: var(--sheet-ink);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.specimen__note {
+  margin: 0;
+  color: var(--sheet-muted);
+  font-size: 14px;
+}
+
+.specimen__stage {
+  padding: 32px;
+  border: 1px solid var(--sheet-line);
+  border-radius: 16px;
+  overflow-x: auto;
+}
+
+.specimen__stage--white {
+  background: var(--neutral-0);
+}
+
+.specimen__stage--neutral {
+  background: var(--neutral-100);
+}
+
+.surface {
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.surface--neutral {
+  background: var(--neutral-100);
+}
+
+.state-grid {
+  display: grid;
+  align-items: center;
+  gap: 28px 40px;
+}
+
+.state-grid__row {
+  display: contents;
+}
+
+.state-grid__label {
+  color: var(--sheet-muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.state-grid__label--column {
+  color: var(--sheet-ink);
+}
+
+.state-grid__cell {
+  display: flex;
+  align-items: center;
+}
+
+.state-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 40px;
+}
+
+.state-list--wide {
+  flex-direction: column;
+}
+
+.state-list__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.state-list--wide .state-list__item {
+  align-items: stretch;
+  max-width: 1120px;
+}
+
+.specimen__icon {
+  color: var(--brand-900);
+}
+
+.state-list .o-input {
+  width: 320px;
+}

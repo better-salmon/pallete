@@ -1,4 +1,4 @@
-/* Color primitives — Figma "Offers" › primitives (node 2821:152). */
+/* Color primitives of the Offers design. */
 :root {
   /* neutral — поверхности: фон, карточки, поля */
   --neutral-50: #fcf8f1;
@@ -35,6 +35,45 @@
   --brand-700: #066365;
   --brand-800: #045556;
   --brand-900: #034b4c;
+
+  /* alert — ошибка и деструктивные действия */
+  --alert-50: #fef3f2;
+  --alert-100: #fde0de;
+  --alert-200: #fbc0bc;
+  --alert-300: #f9958e;
+  --alert-400: #f66a60;
+  --alert-500: #f44336;
+  --alert-600: #d23c32;
+  --alert-700: #a7342e;
+  --alert-800: #812c2a;
+  --alert-900: #5a2525;
+
+  /* warning — предупреждение */
+  --warning-50: #fef9f0;
+  --warning-100: #fdefd6;
+  --warning-200: #fcdfae;
+  --warning-300: #f9c876;
+  --warning-400: #f7b23e;
+  --warning-500: #f59e0b;
+  --warning-600: #d3890e;
+  --warning-700: #a86f12;
+  --warning-800: #815815;
+  --warning-900: #5b4118;
+
+  /* success — успех и подтверждение */
+  --success-50: #f0f9f4;
+  --success-100: #d8f0e1;
+  --success-200: #b1e0c3;
+  --success-300: #7ccb99;
+  --success-400: #47b670;
+  --success-500: #16a34a;
+  --success-600: #168d43;
+  --success-700: #16733b;
+  --success-800: #165a33;
+  --success-900: #16422c;
+
+  /* white sits outside the neutral scale (its 50 is #FCF8F1) */
+  --neutral-0: #fff;
 
   /* page chrome used by the palette sheet */
   --sheet-bg: #fff;

@@ -10,7 +10,7 @@ import {
 import { oklabLightness } from "./oklch.ts";
 import { FormulaExplainer } from "./FormulaExplainer.tsx";
 import { LivePalette, Palette } from "./Palette.tsx";
-import { loadSavedState, saveState, type SavedPalette, type SavedState } from "./savedPalettes.ts";
+import { DEFAULT_STATE, loadSavedState, saveState, type SavedPalette } from "./savedPalettes.ts";
 
 /** Scales with hand-picked Figma tokens in tokens.css; each has its own formula. */
 const FIGMA_SCALES: Formula[] = ["neutral", "accent", "brand"];
@@ -20,16 +20,6 @@ type Generated = SavedPalette & { id: string };
 
 let lastId = 0;
 const nextId = () => `scale-${++lastId}`;
-
-/** Starting names, keys and formulas for the generated scales; all can be changed. */
-const DEFAULT_STATE: SavedState = {
-  globalKey: "#3d8fe4",
-  palettes: [
-    { name: "blue", key: "#3d8fe4", formula: "vivid" },
-    { name: "green", key: "#45b164", formula: "vivid" },
-    { name: "violet", key: "#9572e7", formula: "vivid" },
-  ],
-};
 
 const withIds = (palettes: SavedPalette[]): Generated[] =>
   palettes.map((palette) => ({ ...palette, id: nextId() }));

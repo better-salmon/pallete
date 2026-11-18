@@ -5,6 +5,16 @@ export type SavedPalette = { name: string; key: string; formula: Formula };
 
 export type SavedState = { globalKey: string; palettes: SavedPalette[] };
 
+/** Starting names, keys and formulas for the generated scales; all can be changed. */
+export const DEFAULT_STATE: SavedState = {
+  globalKey: "#3d8fe4",
+  palettes: [
+    { name: "blue", key: "#3d8fe4", formula: "vivid" },
+    { name: "green", key: "#45b164", formula: "vivid" },
+    { name: "violet", key: "#9572e7", formula: "vivid" },
+  ],
+};
+
 const STORAGE_KEY = "pallete:generated:v1";
 
 const isHex = (value: unknown): value is string =>
