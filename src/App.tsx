@@ -25,9 +25,28 @@ const DEFAULT_GENERATED: Record<string, Generated> = {
 
 export function App() {
   const [generated, setGenerated] = useState(DEFAULT_GENERATED);
+  const [globalKey, setGlobalKey] = useState(DEFAULT_GENERATED.blue.key);
 
   const update = (scale: string, patch: Partial<Generated>) =>
     setGenerated((prev) => ({ ...prev, [scale]: { ...prev[scale], ...patch } }));
+
+  /** Adds a scale named custom-N, starting from the global key and the vivid formula. */
+  const addScale = () =>
+    setGenerated((prev) => {
+      let n = 1;
+      while (`custom-${n}` in prev) n++;
+      return { ...prev, [`custom-${n}`]: { key: globalKey, formula: "vivid" } };
+    });
+
+  const removeScale = (scale: string) => setGenerated(({ [scale]: _removed, ...rest }) => rest);
+
+  /** Gives every generated scale the same key; each keeps its own formula. */
+  const setAllKeys = (key: string) => {
+    setGlobalKey(key);
+    setGenerated((prev) =>
+      Object.fromEntries(Object.entries(prev).map(([scale, g]) => [scale, { ...g, key }])),
+    );
+  };
 
   return (
     <main className="sheet">
@@ -59,6 +78,7 @@ export function App() {
             }
           />
         ))}
+        <GlobalKeyPicker value={globalKey} scales={Object.keys(generated)} onChange={setAllKeys} />
         {Object.entries(generated).map(([scale, { key, formula }]) => (
           <LivePalette
             key={scale}
@@ -72,10 +92,14 @@ export function App() {
                 formula={formula}
                 onKeyChange={(next) => update(scale, { key: next })}
                 onFormulaChange={(next) => update(scale, { formula: next })}
+                onRemove={() => removeScale(scale)}
               />
             }
           />
         ))}
+        <button type="button" className="sheet-button add-palette" onClick={addScale}>
+          + Add palette
+        </button>
       </Group>
 
       <Group
@@ -112,15 +136,52 @@ function Group({ kind, title, description, children }: GroupProps) {
   );
 }
 
+type GlobalKeyPickerProps = {
+  value: string;
+  scales: string[];
+  onChange: (hex: string) => void;
+};
+
+/** One key for all generated scales; their own pickers still override it afterwards. */
+function GlobalKeyPicker({ value, scales, onChange }: GlobalKeyPickerProps) {
+  return (
+    <div className="key-picker key-picker--global">
+      <span className="key-picker__label">Global key</span>
+      <label className="key-picker__control">
+        <input
+          type="color"
+          value={value}
+          aria-label={`500 key color for ${scales.join(", ")}`}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <code>{value}</code>
+      </label>
+      <span className="key-picker__range">
+        {scales.length > 0
+          ? `sets the 500 key of ${scales.join(", ")} · each keeps its formula`
+          : "no palettes to set · add one below"}
+      </span>
+    </div>
+  );
+}
+
 type KeyPickerProps = {
   scale: string;
   value: string;
   formula: Formula;
   onKeyChange: (hex: string) => void;
   onFormulaChange: (formula: Formula) => void;
+  onRemove: () => void;
 };
 
-function KeyPicker({ scale, value, formula, onKeyChange, onFormulaChange }: KeyPickerProps) {
+function KeyPicker({
+  scale,
+  value,
+  formula,
+  onKeyChange,
+  onFormulaChange,
+  onRemove,
+}: KeyPickerProps) {
   return (
     <div className="key-picker">
       <label className="key-picker__control">
@@ -145,6 +206,14 @@ function KeyPicker({ scale, value, formula, onKeyChange, onFormulaChange }: KeyP
         ))}
       </select>
       <LightnessHint value={value} formula={formula} />
+      <button
+        type="button"
+        className="sheet-button"
+        aria-label={`Remove ${scale} palette`}
+        onClick={onRemove}
+      >
+        Remove
+      </button>
     </div>
   );
 }

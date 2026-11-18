@@ -102,7 +102,7 @@ function CopyJsonButton({
   return (
     <button
       type="button"
-      className="palette__copy"
+      className="sheet-button"
       aria-label={`Copy ${name} palette as JSON`}
       title="Copy the 50–900 hex values as JSON"
       onClick={copy}

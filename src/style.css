@@ -116,7 +116,7 @@ body {
   color: var(--sheet-ink);
 }
 
-.palette__copy {
+.sheet-button {
   height: 34px;
   padding: 0 12px;
   border: 1px solid var(--sheet-line);
@@ -128,7 +128,7 @@ body {
   cursor: pointer;
 }
 
-.palette__copy:hover {
+.sheet-button:hover {
   border-color: var(--sheet-ink);
 }
 
@@ -202,6 +202,25 @@ code {
   background: var(--sheet-bg);
   color: var(--sheet-ink);
   font: inherit;
+}
+
+.add-palette {
+  align-self: flex-start;
+  border-style: dashed;
+  border-color: var(--group-accent);
+  color: var(--group-accent);
+}
+
+.key-picker--global {
+  padding-top: 24px;
+  border-top: 1px dashed var(--group-accent);
+}
+
+.key-picker__label {
+  font-weight: 500;
+  color: var(--group-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .key-picker__range {
