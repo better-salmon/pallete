@@ -51,7 +51,8 @@
 }
 
 /*
- * brand: no mix fits, because 300 and 400 are more saturated than the key.
+ * brand: no mix fits, because 300 keeps the key's full chroma and 400 has more
+ * (× 1.264), while mixing toward white always lowers it.
  * Every step is the key shifted in OKLCH: lightness offset, chroma factor.
  */
 .ramp--brand {

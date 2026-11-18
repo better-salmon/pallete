@@ -8,6 +8,7 @@ import {
   type Formula,
 } from "./formulas.ts";
 import { oklabLightness } from "./oklch.ts";
+import { FormulaExplainer } from "./FormulaExplainer.tsx";
 import { LivePalette, Palette } from "./Palette.tsx";
 
 /** Scales with hand-picked Figma tokens in tokens.css; each has its own formula. */
@@ -76,12 +77,20 @@ export function App() {
           />
         ))}
       </Group>
+
+      <Group
+        kind="explain"
+        title="How it works"
+        description="Each formula drawn on the OKLCH lightness–chroma plane at the key's hue. Change the key to see how each one responds."
+      >
+        <FormulaExplainer />
+      </Group>
     </main>
   );
 }
 
 type GroupProps = {
-  kind: "static" | "live";
+  kind: "static" | "live" | "explain";
   title: string;
   description: string;
   children: ReactNode;

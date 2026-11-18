@@ -196,6 +196,376 @@ code {
   color: var(--sheet-warn);
 }
 
+/* "How it works" group: one plot per formula. */
+.group--explain {
+  background: var(--sheet-bg);
+  border: 2px solid var(--sheet-line);
+}
+
+.explainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.explainer__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  font-size: 13px;
+}
+
+.explainer__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.explainer__preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--sheet-line);
+  border-radius: 999px;
+  background: var(--sheet-bg);
+  color: var(--sheet-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.explainer__preset[aria-pressed="true"] {
+  border-color: var(--sheet-ink);
+}
+
+.explainer__preset-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.explainer__note {
+  color: var(--sheet-muted);
+}
+
+.explainer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 32px 28px;
+}
+
+.explainer__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.explainer__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.explainer__caption {
+  margin: 0;
+  min-height: 5.6em;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--sheet-muted);
+}
+
+.explainer__strip {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.explainer__strip li {
+  height: 24px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+
+.explainer__table summary {
+  font-size: 13px;
+  color: var(--sheet-muted);
+  cursor: pointer;
+}
+
+.explainer__table table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.explainer__table th,
+.explainer__table td {
+  padding: 2px 12px 2px 0;
+  text-align: left;
+}
+
+.explainer__table th {
+  font-weight: 500;
+  color: var(--sheet-muted);
+}
+
+.plot {
+  position: relative;
+}
+
+.plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.plot__gamut {
+  fill: var(--sheet-gamut);
+}
+
+.plot__grid {
+  stroke: var(--sheet-grid);
+  stroke-width: 1;
+}
+
+.plot__axis {
+  stroke: var(--sheet-axis);
+  stroke-width: 1;
+}
+
+.plot__tick,
+.plot__axis-title,
+.plot__note,
+.plot__label {
+  font-size: 11px;
+  fill: var(--sheet-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.plot__label {
+  fill: var(--sheet-ink);
+}
+
+.plot__guide {
+  fill: none;
+  stroke: var(--sheet-muted);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.plot__guide--reference {
+  stroke: var(--sheet-axis);
+}
+
+.plot__ladder {
+  stroke: var(--sheet-axis);
+  stroke-width: 1;
+}
+
+.plot__arrow {
+  stroke: var(--sheet-ink);
+  stroke-width: 1.5;
+}
+
+.plot__arrowhead {
+  fill: var(--sheet-ink);
+}
+
+.plot__endpoint {
+  fill: var(--sheet-bg);
+  stroke: var(--sheet-muted);
+  stroke-width: 1.25;
+}
+
+.plot__key {
+  fill: none;
+  stroke: var(--sheet-ink);
+  stroke-width: 1.5;
+}
+
+.plot__dot {
+  stroke: var(--sheet-bg);
+  stroke-width: 2;
+}
+
+.plot__hit {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+}
+
+.plot__hit:focus-visible {
+  stroke: var(--sheet-ink);
+  stroke-width: 1.5;
+}
+
+.plot__tooltip {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--sheet-line);
+  border-radius: 8px;
+  background: var(--sheet-bg);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.plot__tooltip strong {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 500;
+  color: var(--sheet-ink);
+}
+
+.plot__tooltip span {
+  color: var(--sheet-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.explainer__slider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: 13px;
+}
+
+.explainer__slider input[type="range"] {
+  width: min(320px, 100%);
+  accent-color: var(--sheet-ink);
+}
+
+.explainer__slider output {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.explainer__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sheet-ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.plot__intended {
+  fill: var(--sheet-bg);
+  stroke: var(--sheet-ink);
+  stroke-width: 1.25;
+}
+
+.plot__clip {
+  stroke: var(--sheet-ink);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.staircase {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--sheet-line);
+}
+
+.staircase__caption {
+  min-height: 0;
+  max-width: 72ch;
+}
+
+.staircase__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.staircase__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.staircase__key {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.staircase__key--current {
+  height: 4px;
+  background: var(--sheet-ink);
+}
+
+.staircase__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.staircase__chart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+
+.staircase__name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.staircase__line,
+.staircase__line--current {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.staircase__line--current {
+  stroke: var(--sheet-ink);
+  stroke-width: 2.5;
+}
+
+.staircase__tooltip {
+  gap: 3px;
+}
+
+.staircase__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.staircase__row b {
+  font-weight: 500;
+  color: var(--sheet-ink);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 640px) {
   .sheet {
     padding: 32px 16px;

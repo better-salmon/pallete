@@ -27,3 +27,15 @@ export const LADDER_500_LIGHTNESS = 0.57;
 
 /** OKLCH lightness perceptual-v2 pins every 50 and 900 to. */
 export const LADDER_ENDS = { top: 0.97, bottom: 0.25 } as const;
+
+/** OKLCH lightness of each step in the perceptual formula, 50 → 900. */
+export const PERCEPTUAL_LADDER = [0.97, 0.89, 0.81, 0.73, 0.65, 0.57, 0.49, 0.41, 0.33, 0.25];
+
+/** Keys the "How it works" section offers as presets and draws in the staircase. */
+export const KEY_PRESETS = [
+  { label: "accent 500", hex: "#fd715e" },
+  { label: "neutral 500", hex: "#918878" },
+  { label: "brand 500", hex: "#148385" },
+  { label: "blue", hex: "#3d8fe4" },
+  { label: "yellow", hex: "#f5c518" },
+];
