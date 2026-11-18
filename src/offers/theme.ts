@@ -90,17 +90,25 @@ export function resolveSteps(source: RoleSource): string[] {
     : sampleRamp(source.key, source.formula).map((sample) => sample.hex);
 }
 
+/** The ten hex values every role currently resolves to. */
+export function resolveTheme(theme: Theme): Record<Role, string[]> {
+  return Object.fromEntries(ROLES.map((role) => [role, resolveSteps(theme[role])])) as Record<
+    Role,
+    string[]
+  >;
+}
+
 /**
  * Custom properties that point every role at its chosen palette. Values are
  * resolved hexes, not var() references, so mapping brand to the original
  * accent still works while accent itself is overridden.
  */
-export function themeStyle(theme: Theme): Record<string, string> {
+export function themeStyle(theme: Theme, steps = resolveTheme(theme)): Record<string, string> {
   const style: Record<string, string> = {};
   for (const role of ROLES) {
     const source = theme[role];
     if (source.kind === "original" && source.role === role) continue;
-    resolveSteps(source).forEach((hex, i) => {
+    steps[role].forEach((hex, i) => {
       style[`--${role}-${STEPS[i]}`] = hex;
     });
   }

@@ -22,7 +22,7 @@ import { GLYPH_NAMES, Icon } from "./offers/icons.tsx";
 import {
   loadTheme,
   ORIGINAL_THEME,
-  resolveSteps,
+  resolveTheme,
   ROLE_NOTES,
   ROLES,
   saveTheme,
@@ -32,56 +32,120 @@ import {
 } from "./offers/theme.ts";
 import "./offers/offers.css";
 
+const PANEL_KEY = "pallete:components-panel-collapsed";
+
+function loadCollapsed(): boolean {
+  try {
+    return localStorage.getItem(PANEL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function saveCollapsed(collapsed: boolean): void {
+  try {
+    localStorage.setItem(PANEL_KEY, collapsed ? "1" : "0");
+  } catch {
+    // Only a convenience; the panel just opens expanded next time.
+  }
+}
+
 export function ComponentsPage() {
   const [theme, setTheme] = useState(loadTheme);
   // The palettes made on the Palettes page, read once when this page opens.
   const [saved] = useState(() => (loadSavedState() ?? DEFAULT_STATE).palettes);
+  const [collapsed, setCollapsed] = useState(loadCollapsed);
 
   useEffect(() => {
     saveTheme(theme);
   }, [theme]);
 
-  const style = useMemo(() => themeStyle(theme), [theme]);
+  useEffect(() => {
+    saveCollapsed(collapsed);
+  }, [collapsed]);
+
+  const steps = useMemo(() => resolveTheme(theme), [theme]);
+  const style = useMemo(() => themeStyle(theme, steps), [theme, steps]);
   const setRole = (role: Role, source: RoleSource) =>
     setTheme((prev) => ({ ...prev, [role]: source }));
 
   return (
     <main className="sheet">
-      <section className="group group--live" aria-labelledby="theme-title">
-        <header className="group__header">
-          <h2 className="group__title" id="theme-title">
-            <span className="group__badge">Palettes</span>
-          </h2>
-          <p className="group__description">
-            Each role starts on its original scale. Point it at another original, a palette from the
-            Palettes page, or a custom key; every component below follows.
-          </p>
-          <button
-            type="button"
-            className="sheet-button"
-            onClick={() => setTheme(ORIGINAL_THEME)}
-            title="Put every role back on its original scale"
-          >
-            Reset to originals
-          </button>
-        </header>
-        <div className="role-pickers">
-          {ROLES.map((role) => (
-            <RolePicker
-              key={role}
-              role={role}
-              source={theme[role]}
-              saved={saved}
-              onChange={(source) => setRole(role, source)}
-            />
-          ))}
+      <div className={collapsed ? "workbench workbench--collapsed" : "workbench"}>
+        <div className="offers specimens" style={style as CSSProperties}>
+          <Gallery />
         </div>
-      </section>
 
-      <div className="offers specimens" style={style as CSSProperties}>
-        <Gallery />
+        {/* Sticks beside the gallery (floats bottom-right on narrow screens), so
+            colors can change while any component is in view. */}
+        <aside className="theme-panel" aria-labelledby="theme-title">
+          <header className="theme-panel__header">
+            <h2 className="theme-panel__title" id="theme-title">
+              Palettes
+            </h2>
+            {!collapsed && (
+              <button
+                type="button"
+                className="sheet-button"
+                onClick={() => setTheme(ORIGINAL_THEME)}
+                title="Put every role back on its original scale"
+              >
+                Reset
+              </button>
+            )}
+            <button
+              type="button"
+              className="sheet-button theme-panel__toggle"
+              aria-expanded={!collapsed}
+              aria-controls="theme-panel-body"
+              onClick={() => setCollapsed((value) => !value)}
+            >
+              {collapsed ? "Show" : "Hide"}
+            </button>
+          </header>
+
+          {collapsed ? (
+            <ul className="theme-panel__minis" aria-label="Current palettes">
+              {ROLES.map((role) => (
+                <li key={role} title={role}>
+                  <span className="theme-panel__mini-name">{role}</span>
+                  <Strip role={role} steps={steps[role]} compact />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="theme-panel__body" id="theme-panel-body">
+              <p className="theme-panel__description">
+                Point each role at another original, a palette from the Palettes page, or a custom
+                key. Every component follows.
+              </p>
+              {ROLES.map((role) => (
+                <RolePicker
+                  key={role}
+                  role={role}
+                  source={theme[role]}
+                  steps={steps[role]}
+                  saved={saved}
+                  onChange={(source) => setRole(role, source)}
+                />
+              ))}
+            </div>
+          )}
+        </aside>
       </div>
     </main>
+  );
+}
+
+function Strip({ role, steps, compact }: { role: Role; steps: string[]; compact?: boolean }) {
+  return (
+    <ul
+      className={compact ? "role-picker__strip role-picker__strip--compact" : "role-picker__strip"}
+    >
+      {steps.map((hex, i) => (
+        <li key={STEPS[i]} style={{ background: hex }} title={`${role}-${STEPS[i]} ${hex}`} />
+      ))}
+    </ul>
   );
 }
 
@@ -102,12 +166,12 @@ function sourceValue(source: RoleSource, saved: SavedPalette[]): string {
 type RolePickerProps = {
   role: Role;
   source: RoleSource;
+  steps: string[];
   saved: SavedPalette[];
   onChange: (source: RoleSource) => void;
 };
 
-function RolePicker({ role, source, saved, onChange }: RolePickerProps) {
-  const steps = useMemo(() => resolveSteps(source), [source]);
+function RolePicker({ role, source, steps, saved, onChange }: RolePickerProps) {
   const value = sourceValue(source, saved);
 
   const choose = (next: string) => {
@@ -189,11 +253,7 @@ function RolePicker({ role, source, saved, onChange }: RolePickerProps) {
           </>
         )}
       </div>
-      <ul className="role-picker__strip">
-        {steps.map((hex, i) => (
-          <li key={STEPS[i]} style={{ background: hex }} title={`${role}-${STEPS[i]} ${hex}`} />
-        ))}
-      </ul>
+      <Strip role={role} steps={steps} />
     </section>
   );
 }
