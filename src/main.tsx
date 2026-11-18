@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { ComponentsPage } from "./ComponentsPage.tsx";
+import { applyMode, loadMode, saveMode, type Mode } from "./mode.ts";
 import "./style.css";
 
 /** Hash routes, so the static build works from any folder (e.g. GitHub Pages). */
@@ -23,6 +24,12 @@ function useHash() {
 function Root() {
   const hash = useHash();
   const onComponents = hash === "#/components";
+  const [mode, setMode] = useState(loadMode);
+
+  useEffect(() => {
+    applyMode(mode);
+    saveMode(mode);
+  }, [mode]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -44,11 +51,27 @@ function Root() {
             </a>
           );
         })}
+        <div className="mode-toggle site-nav__mode" role="group" aria-label="Color mode">
+          {(["light", "dark"] as const satisfies readonly Mode[]).map((option) => (
+            <button
+              key={option}
+              type="button"
+              className="sheet-button"
+              aria-pressed={mode === option}
+              onClick={() => setMode(option)}
+            >
+              {option === "light" ? "Light" : "Dark"}
+            </button>
+          ))}
+        </div>
       </nav>
-      {onComponents ? <ComponentsPage /> : <App />}
+      {onComponents ? <ComponentsPage mode={mode} /> : <App />}
     </>
   );
 }
+
+// Before the first render, so a dark session doesn't flash light.
+applyMode(loadMode());
 
 createRoot(document.getElementById("app")!).render(
   <StrictMode>

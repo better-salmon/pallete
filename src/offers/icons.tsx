@@ -124,10 +124,10 @@ export function CheckBadge(props: Omit<IconProps, "size">) {
       focusable="false"
       {...props}
     >
-      <circle cx="10" cy="10" r="9.5" fill="var(--accent-500)" stroke="var(--neutral-0)" />
+      <circle cx="10" cy="10" r="9.5" fill="var(--o-accent)" stroke="var(--o-surface)" />
       <path
         d="M12.3333 8L8.66667 11.6667L7 10"
-        stroke="var(--neutral-0)"
+        stroke="var(--o-on-color)"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

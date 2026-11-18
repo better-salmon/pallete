@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { FORMULAS, type Formula } from "./formulas.ts";
 import { STEPS } from "./Palette.tsx";
+import type { Mode } from "./mode.ts";
 import { DEFAULT_STATE, loadSavedState, type SavedPalette } from "./savedPalettes.ts";
 import {
   Accordion,
@@ -33,6 +34,31 @@ import {
 import "./offers/offers.css";
 
 const PANEL_KEY = "pallete:components-panel-collapsed";
+const DARK_SURFACE_KEY = "pallete:dark-surface";
+
+/**
+ * Dark mode's plain surface (cards, inputs, chips, the plain stages): one fixed
+ * color, as light mode's is white, rather than a neutral step. Matches
+ * offers.css's default for --o-dark-surface.
+ */
+const DEFAULT_DARK_SURFACE = "#1e1a17";
+
+function loadDarkSurface(): string {
+  try {
+    const value = localStorage.getItem(DARK_SURFACE_KEY);
+    return value !== null && /^#[0-9a-f]{6}$/i.test(value) ? value : DEFAULT_DARK_SURFACE;
+  } catch {
+    return DEFAULT_DARK_SURFACE;
+  }
+}
+
+function saveDarkSurface(hex: string): void {
+  try {
+    localStorage.setItem(DARK_SURFACE_KEY, hex);
+  } catch {
+    // Only a convenience; the default comes back next time.
+  }
+}
 
 function loadCollapsed(): boolean {
   try {
@@ -50,11 +76,12 @@ function saveCollapsed(collapsed: boolean): void {
   }
 }
 
-export function ComponentsPage() {
+export function ComponentsPage({ mode }: { mode: Mode }) {
   const [theme, setTheme] = useState(loadTheme);
   // The palettes made on the Palettes page, read once when this page opens.
   const [saved] = useState(() => (loadSavedState() ?? DEFAULT_STATE).palettes);
   const [collapsed, setCollapsed] = useState(loadCollapsed);
+  const [darkSurface, setDarkSurface] = useState(loadDarkSurface);
 
   useEffect(() => {
     saveTheme(theme);
@@ -64,15 +91,25 @@ export function ComponentsPage() {
     saveCollapsed(collapsed);
   }, [collapsed]);
 
+  useEffect(() => {
+    saveDarkSurface(darkSurface);
+  }, [darkSurface]);
+
   const steps = useMemo(() => resolveTheme(theme), [theme]);
-  const style = useMemo(() => themeStyle(theme, steps), [theme, steps]);
+  const style = useMemo(
+    () => ({ ...themeStyle(theme, steps), "--o-dark-surface": darkSurface }),
+    [theme, steps, darkSurface],
+  );
   const setRole = (role: Role, source: RoleSource) =>
     setTheme((prev) => ({ ...prev, [role]: source }));
 
   return (
     <main className="sheet">
       <div className={collapsed ? "workbench workbench--collapsed" : "workbench"}>
-        <div className="offers specimens" style={style as CSSProperties}>
+        <div
+          className={mode === "dark" ? "offers offers--dark specimens" : "offers specimens"}
+          style={style as CSSProperties}
+        >
           <Gallery />
         </div>
 
@@ -119,6 +156,44 @@ export function ComponentsPage() {
                 Point each role at another original, a palette from the Palettes page, or a custom
                 key. Every component follows.
               </p>
+              {mode === "dark" && (
+                <>
+                  <p className="theme-panel__description">
+                    Dark mode reads each scale from the other end: 900 as the tinted backdrop, 700
+                    as fills, 50–300 as text. The originals and vivid end at L 0.25 or lighter;
+                    vivid-dark pins 700 / 800 / 900 at 0.27 / 0.22 / 0.18. Compare neutral on vivid
+                    and on vivid-dark.
+                  </p>
+                  <section className="role-picker" aria-label="Dark surface">
+                    <header className="role-picker__header">
+                      <h3 className="role-picker__name">dark surface</h3>
+                      <span className="role-picker__note">
+                        cards, inputs, plain stages; fixed, like white in light mode
+                      </span>
+                    </header>
+                    <div className="key-picker">
+                      <label className="key-picker__control">
+                        <input
+                          type="color"
+                          value={darkSurface}
+                          aria-label="Dark-mode surface color"
+                          onChange={(event) => setDarkSurface(event.target.value)}
+                        />
+                        <code>{darkSurface}</code>
+                      </label>
+                      {darkSurface !== DEFAULT_DARK_SURFACE && (
+                        <button
+                          type="button"
+                          className="sheet-button"
+                          onClick={() => setDarkSurface(DEFAULT_DARK_SURFACE)}
+                        >
+                          Default
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                </>
+              )}
               {ROLES.map((role) => (
                 <RolePicker
                   key={role}

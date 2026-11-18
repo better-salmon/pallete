@@ -87,4 +87,27 @@
   --sheet-grid: #e1e0d9;
   --sheet-axis: #c3c2b7;
   --sheet-gamut: #efeee9;
+  /* hairline that keeps pale swatches visible on pale boxes */
+  --sheet-swatch-edge: rgb(0 0 0 / 0.06);
+}
+
+/*
+ * Page chrome in dark mode (mode.ts puts data-mode on <html>). The role
+ * scales above stay as they are; the Offers gallery remaps them itself in
+ * .offers--dark. The page sits a step below the gallery's default dark
+ * surface (#1e1a17).
+ */
+:root[data-mode="dark"] {
+  --sheet-bg: #111114;
+  --sheet-ink: #ececf1;
+  --sheet-muted: #9d9da8;
+  --sheet-line: #34343c;
+  --sheet-static-bg: #18181c;
+  --sheet-live: #4cc27a;
+  --sheet-live-bg: #0f1b14;
+  --sheet-warn: #f0a04b;
+  --sheet-grid: #26262b;
+  --sheet-axis: #46464e;
+  --sheet-gamut: #1c1c21;
+  --sheet-swatch-edge: rgb(255 255 255 / 0.08);
 }
