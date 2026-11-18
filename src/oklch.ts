@@ -12,6 +12,11 @@ export function hexToSrgb(hex: string): Srgb {
   return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255) as Srgb;
 }
 
+/** Linear-light channels (0–1) of a gamma-encoded sRGB color. */
+export function srgbToLinear(rgb: Srgb): Srgb {
+  return rgb.map(toLinear) as Srgb;
+}
+
 export function srgbToHex(rgb: Srgb): string {
   return `#${rgb
     .map((v) =>

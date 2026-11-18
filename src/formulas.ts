@@ -1,8 +1,18 @@
 /**
  * The ramp.css formulas: accent, neutral and brand were each fitted on one
- * Figma palette; perceptual and perceptual-v2 are designed lightness ladders.
+ * Figma palette; perceptual and perceptual-v2 are designed lightness ladders;
+ * vivid and bold are perceptual-v2 with a chroma bulge and a hue
+ * shift.
  */
-export const FORMULAS = ["perceptual-v2", "perceptual", "accent", "neutral", "brand"] as const;
+export const FORMULAS = [
+  "vivid",
+  "bold",
+  "perceptual-v2",
+  "perceptual",
+  "accent",
+  "neutral",
+  "brand",
+] as const;
 
 export type Formula = (typeof FORMULAS)[number];
 
@@ -11,7 +21,7 @@ export type Formula = (typeof FORMULAS)[number];
  * from it push the formula outside the data it was fitted to.
  */
 export const FORMULA_KEY_LIGHTNESS: Record<
-  Exclude<Formula, "perceptual" | "perceptual-v2">,
+  Exclude<Formula, "perceptual" | "perceptual-v2" | "vivid" | "bold">,
   number
 > = {
   accent: 0.714,
@@ -25,7 +35,7 @@ export const LIGHTNESS_TOLERANCE = 0.08;
 /** OKLCH lightness the perceptual formula gives every 500, whatever the key. */
 export const LADDER_500_LIGHTNESS = 0.57;
 
-/** OKLCH lightness perceptual-v2 pins every 50 and 900 to. */
+/** OKLCH lightness perceptual-v2, vivid and bold pin every 50 and 900 to. */
 export const LADDER_ENDS = { top: 0.97, bottom: 0.25 } as const;
 
 /** OKLCH lightness of each step in the perceptual formula, 50 → 900. */

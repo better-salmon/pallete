@@ -45,9 +45,10 @@ export function Staircase({ keyHex }: { keyHex: string }) {
         Lightness by step, across keys
       </h3>
       <p className="explainer__caption staircase__caption">
-        One line per key. Under perceptual every key lands on the same line; under perceptual-v2 the
-        lines pinch together at 50 and 900 and fan out around each key; the fitted formulas carry
-        each key's lightness through the whole ramp.
+        One line per key. Under perceptual every key lands on the same line; under perceptual-v2 and
+        vivid and bold the lines pinch together at 50 and 900 and fan out around each key (both bow
+        their tints up toward white); the fitted formulas carry each key's lightness through the
+        whole ramp.
       </p>
 
       <ul className="staircase__legend" aria-label="Keys">

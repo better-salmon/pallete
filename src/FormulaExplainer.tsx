@@ -12,6 +12,7 @@ import {
   maxChroma,
   oklchToSrgb,
   srgbToHex,
+  srgbToLinear,
   srgbToOklch,
   type Oklch,
   type Srgb,
@@ -24,7 +25,47 @@ import { Staircase } from "./Staircase.tsx";
 const ACCENT_INK = "#16171e";
 const NEUTRAL_INK = "#0d0a06";
 
+/** Fourier terms [amplitude, phase°] of bold's --bold-cap; repeated here only to draw the guide. */
+const BOLD_WHITE_CONE = {
+  mean: -0.3541,
+  terms: [
+    [0.6467, 133.5],
+    [0.3525, 292.7],
+    [0.1405, 291.2],
+    [0.0521, 93.1],
+    [0.1094, 211.2],
+    [0.0156, 65.7],
+  ],
+};
+const BOLD_BLACK_CONE = {
+  mean: 0.2994,
+  terms: [
+    [0.139, 327.4],
+    [0.0731, 262.6],
+    [0.0431, 99.1],
+    [0.0182, 87.3],
+    [0.0098, 322.8],
+    [0.0196, 156.4],
+  ],
+};
+
+const fourier = ({ mean, terms }: { mean: number; terms: number[][] }, h: number) =>
+  terms.reduce(
+    (sum, [a, phase], i) => sum + a * Math.cos((((i + 1) * h - phase) * Math.PI) / 180),
+    mean,
+  );
+
+/** bold's estimate of the largest chroma sRGB can show at this lightness and hue. */
+const boldCap = (l: number, h: number) =>
+  Math.min(
+    Math.exp(fourier(BOLD_WHITE_CONE, h)) * (1 - l) * (2 - l),
+    fourier(BOLD_BLACK_CONE, h) * l,
+  );
+
 const CAPTIONS: Record<Formula, string> = {
+  vivid:
+    "perceptual-v2's key and pinned ends, with chroma pushed off v2's straight lines (the thin tent) toward the outer lines: the room this key has in sRGB. Tints go up to half-way there and ease toward white; shades take all of it by 800. Hue drifts too, which this plane cannot show: compare the yellow and blue strips.",
+  bold: "perceptual-v2's frame — key kept, ends pinned at 0.97 and 0.25 — with chroma that bows out past the straight lines (the thin tent) toward the dashed curve, bold's own estimate of the sRGB edge at the key's hue. It stays between 85% and 2× of the straight-line chroma, so where the estimate is too cautious the dots sit just past the dashed curve. Hue turns too: toward yellow-green as steps lighten, away as they darken, so shades deepen instead of greying.",
   accent:
     "Two straight mixes in sRGB: tints slide toward white, shades toward the ink #16171e. A straight line in sRGB bends in OKLCH, so the dots trace curves.",
   neutral:
@@ -261,6 +302,23 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
   const tent = (apexL: number) =>
     `M ${x(0)} ${y(1)} L ${x(keyColor.c)} ${y(apexL)} L ${x(0)} ${y(0)}`;
 
+  /**
+   * vivid's chroma limits, from the two numbers ramp.css reads off the key's linear
+   * channels: the roof white → brightest undiluted key → key, and the richest shade line.
+   * Drawn unclamped in chroma, so the plot clips them at its right edge.
+   */
+  const vividLimits = () => {
+    const [r, g, b] = srgbToLinear(hexToSrgb(keyHex));
+    const top = Math.cbrt(Math.max(r, g, b));
+    const grey = Math.min(r, g, b) / (0.25 * r + 0.55 * g + 0.2 * b);
+    const px = (c: number) => M.left + (c / cmax) * PW;
+    const rich = keyColor.c * (1 + Math.min(0.5, Number.isFinite(grey) ? grey : 0));
+    return (
+      `M ${px(0)} ${y(1)} L ${px(keyColor.c / top)} ${y(keyColor.l / top)} L ${key.x} ${key.y} ` +
+      `M ${px(rich)} ${key.y} L ${px(0)} ${y(0)}`
+    );
+  };
+
   const cTicks = [0, cmax / 2, cmax];
 
   return (
@@ -282,6 +340,9 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
           >
             <path d="M 0 0 L 10 5 L 0 10 z" className="plot__arrowhead" />
           </marker>
+          <clipPath id={`area-${formula}`}>
+            <rect x={M.left} y={M.top} width={PW} height={PH} />
+          </clipPath>
         </defs>
 
         <path d={gamutPath} className="plot__gamut" />
@@ -373,7 +434,7 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
             )}
           </>
         )}
-        {formula === "perceptual-v2" && (
+        {(formula === "perceptual-v2" || formula === "vivid" || formula === "bold") && (
           <>
             {[LADDER_ENDS.top, LADDER_ENDS.bottom].map((l) => (
               <g key={l}>
@@ -383,7 +444,30 @@ function Plot({ formula, keyHex, samples, keyColor, gamut, cmax }: PlotProps) {
                 </text>
               </g>
             ))}
-            <path d={tent(keyColor.l)} className="plot__guide" />
+            {formula === "perceptual-v2" ? (
+              <path d={tent(keyColor.l)} className="plot__guide" />
+            ) : (
+              <>
+                <path d={tent(keyColor.l)} className="plot__guide plot__guide--reference" />
+                {formula === "vivid" ? (
+                  <path
+                    d={vividLimits()}
+                    className="plot__guide"
+                    clipPath={`url(#area-${formula})`}
+                  />
+                ) : (
+                  <path
+                    d={gamut
+                      .filter((p) => p.l >= 0.2 && p.l <= 0.98)
+                      .map(
+                        (p, i) => `${i === 0 ? "M" : "L"} ${x(boldCap(p.l, keyColor.h))} ${y(p.l)}`,
+                      )
+                      .join(" ")}
+                    className="plot__guide plot__guide--dashed"
+                  />
+                )}
+              </>
+            )}
           </>
         )}
 

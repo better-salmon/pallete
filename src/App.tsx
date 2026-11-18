@@ -18,9 +18,9 @@ type Generated = { key: string; formula: Formula };
 
 /** Starting keys and formulas for the generated scales; both can be changed. */
 const DEFAULT_GENERATED: Record<string, Generated> = {
-  blue: { key: "#3d8fe4", formula: "perceptual-v2" },
-  green: { key: "#45b164", formula: "perceptual-v2" },
-  violet: { key: "#9572e7", formula: "perceptual-v2" },
+  blue: { key: "#3d8fe4", formula: "vivid" },
+  green: { key: "#45b164", formula: "vivid" },
+  violet: { key: "#9572e7", formula: "vivid" },
 };
 
 export function App() {
@@ -153,14 +153,18 @@ function KeyPicker({ scale, value, formula, onKeyChange, onFormulaChange }: KeyP
 function LightnessHint({ value, formula }: { value: string; formula: Formula }) {
   const lightness = oklabLightness(value).toFixed(2);
 
-  if (formula === "perceptual-v2") {
+  if (formula === "perceptual-v2" || formula === "vivid" || formula === "bold") {
     const { top, bottom } = LADDER_ENDS;
     const inside = oklabLightness(value) > bottom && oklabLightness(value) < top;
+    const spacing =
+      formula === "perceptual-v2"
+        ? `spaces the other steps evenly toward L ${top} and ${bottom}`
+        : `eases the tints toward L ${top}, spaces the shades evenly toward ${bottom}, and lets chroma and hue move along the way`;
 
     return (
       <span
         className={inside ? "key-picker__range" : "key-picker__range key-picker__range--out"}
-        title={`perceptual-v2 keeps the key exactly at 500 and spaces the other steps evenly toward L ${top} and ${bottom}`}
+        title={`${formula} keeps the key exactly at 500 and ${spacing}`}
       >
         L {lightness} · key kept · ends {top} / {bottom}
         {inside ? "" : " · outside, steps fall out of order"}

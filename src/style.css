@@ -366,6 +366,10 @@ code {
   stroke: var(--sheet-axis);
 }
 
+.plot__guide--dashed {
+  stroke-dasharray: 4 3;
+}
+
 .plot__ladder {
   stroke: var(--sheet-axis);
   stroke-width: 1;
