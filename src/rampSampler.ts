@@ -1,5 +1,6 @@
 import type { Formula } from "./formulas.ts";
-import { srgbToHex, srgbToOklch, type Oklch, type Srgb } from "./oklch.ts";
+import { srgbToHex, srgbToOklch, type Oklch } from "./oklch.ts";
+import { toScreenSrgb } from "./screenColor.ts";
 import { STEPS, type Step } from "./Palette.tsx";
 
 export type Sample = {
@@ -12,23 +13,6 @@ export type Sample = {
   /** True when the formula asked for a color sRGB cannot show, so it was clipped. */
   clipped: boolean;
 };
-
-/** Canvas that turns any CSS color into 8-bit sRGB, as the screen shows it. */
-let canvas: CanvasRenderingContext2D | null = null;
-
-function toScreenSrgb(color: string): Srgb {
-  canvas ??= Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext(
-    "2d",
-    { willReadFrequently: true },
-  );
-  if (!canvas) return [0, 0, 0];
-  canvas.clearRect(0, 0, 1, 1);
-  canvas.fillStyle = "#000";
-  canvas.fillStyle = color;
-  canvas.fillRect(0, 0, 1, 1);
-  const [r, g, b] = canvas.getImageData(0, 0, 1, 1).data;
-  return [r / 255, g / 255, b / 255];
-}
 
 const NUMBER = String.raw`(-?[\d.]+(?:e-?\d+)?|none)`;
 const OKLCH = new RegExp(String.raw`^oklch\(${NUMBER} ${NUMBER} ${NUMBER}`);
