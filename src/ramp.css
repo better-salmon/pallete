@@ -1,0 +1,61 @@
+/*
+ * Ramp formulas: one per Figma palette, each derived from that palette's 500
+ * key alone and fitted only on its own swatches. All three reproduce every
+ * Figma hex in tokens.css exactly.
+ *
+ * Usage: put .ramp plus one formula class (.ramp--accent, .ramp--neutral or
+ * .ramp--brand) on an element, set --ramp-key on that same element, and read
+ * var(--ramp-50) … var(--ramp-900) on it or on its descendants.
+ */
+.ramp {
+  --ramp-500: var(--ramp-key);
+}
+
+/*
+ * accent: plain sRGB mixes — the key toward white for tints and toward the
+ * dark ink #16171e for shades.
+ */
+.ramp--accent {
+  --ramp-50: color-mix(in srgb, var(--ramp-key), white 93.75%);
+  --ramp-100: color-mix(in srgb, var(--ramp-key), white 83.2%);
+  --ramp-200: color-mix(in srgb, var(--ramp-key), white 66.65%);
+  --ramp-300: color-mix(in srgb, var(--ramp-key), white 43.55%);
+  --ramp-400: color-mix(in srgb, var(--ramp-key), white 21.1%);
+  --ramp-600: color-mix(in srgb, var(--ramp-key), #16171e 15.6%);
+  --ramp-700: color-mix(in srgb, var(--ramp-key), #16171e 34.6%);
+  --ramp-800: color-mix(in srgb, var(--ramp-key), #16171e 52%);
+  --ramp-900: color-mix(in srgb, var(--ramp-key), #16171e 69.2%);
+}
+
+/*
+ * neutral: tints lighten in OKLCH and keep more chroma than a white mix would
+ * (that is what makes them warm); shades are sRGB mixes toward the warm black
+ * #0d0a06.
+ */
+.ramp--neutral {
+  --ramp-50: oklch(from var(--ramp-key) calc(l + 0.35) calc(c * 0.4) h);
+  --ramp-100: oklch(from var(--ramp-key) calc(l + 0.318) calc(c * 0.62) h);
+  --ramp-200: oklch(from var(--ramp-key) calc(l + 0.259) calc(c * 0.84) h);
+  --ramp-300: oklch(from var(--ramp-key) calc(l + 0.172) calc(c * 0.9) h);
+  --ramp-400: oklch(from var(--ramp-key) calc(l + 0.082) calc(c * 0.92) h);
+  --ramp-600: color-mix(in srgb, var(--ramp-key), #0d0a06 16.5%);
+  --ramp-700: color-mix(in srgb, var(--ramp-key), #0d0a06 37.4%);
+  --ramp-800: color-mix(in srgb, var(--ramp-key), #0d0a06 55.85%);
+  --ramp-900: color-mix(in srgb, var(--ramp-key), #0d0a06 74.4%);
+}
+
+/*
+ * brand: no mix fits, because 300 and 400 are more saturated than the key.
+ * Every step is the key shifted in OKLCH: lightness offset, chroma factor.
+ */
+.ramp--brand {
+  --ramp-50: oklch(from var(--ramp-key) calc(l + 0.42) calc(c * 0.07) h);
+  --ramp-100: oklch(from var(--ramp-key) calc(l + 0.382) calc(c * 0.21) calc(h + 1));
+  --ramp-200: oklch(from var(--ramp-key) calc(l + 0.325) calc(c * 0.48) h);
+  --ramp-300: oklch(from var(--ramp-key) calc(l + 0.251) c h);
+  --ramp-400: oklch(from var(--ramp-key) calc(l + 0.17) calc(c * 1.264) h);
+  --ramp-600: oklch(from var(--ramp-key) calc(l - 0.042) calc(c * 0.937) h);
+  --ramp-700: oklch(from var(--ramp-key) calc(l - 0.1) calc(c * 0.84) h);
+  --ramp-800: oklch(from var(--ramp-key) calc(l - 0.147) calc(c * 0.755) h);
+  --ramp-900: oklch(from var(--ramp-key) calc(l - 0.181) calc(c * 0.69) h);
+}

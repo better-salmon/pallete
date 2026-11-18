@@ -39,4 +39,10 @@
   /* page chrome used by the palette sheet */
   --sheet-bg: #fff;
   --sheet-ink: #16161e;
+  --sheet-muted: #6b6b76;
+  --sheet-line: #d9d9e0;
+  --sheet-static-bg: #f4f4f6;
+  --sheet-live: #1f8a4c;
+  --sheet-live-bg: #f1faf4;
+  --sheet-warn: #b45309;
 }
