@@ -1,5 +1,12 @@
 import { useState, type ReactNode } from "react";
-import { FORMULA_KEY_LIGHTNESS, FORMULAS, LIGHTNESS_TOLERANCE, type Formula } from "./formulas.ts";
+import {
+  FORMULA_KEY_LIGHTNESS,
+  FORMULAS,
+  LADDER_500_LIGHTNESS,
+  LADDER_ENDS,
+  LIGHTNESS_TOLERANCE,
+  type Formula,
+} from "./formulas.ts";
 import { oklabLightness } from "./oklch.ts";
 import { LivePalette, Palette } from "./Palette.tsx";
 
@@ -10,9 +17,9 @@ type Generated = { key: string; formula: Formula };
 
 /** Starting keys and formulas for the generated scales; both can be changed. */
 const DEFAULT_GENERATED: Record<string, Generated> = {
-  blue: { key: "#3d8fe4", formula: "accent" },
-  green: { key: "#45b164", formula: "accent" },
-  violet: { key: "#9572e7", formula: "accent" },
+  blue: { key: "#3d8fe4", formula: "perceptual-v2" },
+  green: { key: "#45b164", formula: "perceptual-v2" },
+  violet: { key: "#9572e7", formula: "perceptual-v2" },
 };
 
 export function App() {
@@ -105,10 +112,6 @@ type KeyPickerProps = {
 };
 
 function KeyPicker({ scale, value, formula, onKeyChange, onFormulaChange }: KeyPickerProps) {
-  const lightness = oklabLightness(value);
-  const fitted = FORMULA_KEY_LIGHTNESS[formula];
-  const near = Math.abs(lightness - fitted) <= LIGHTNESS_TOLERANCE;
-
   return (
     <div className="key-picker">
       <label className="key-picker__control">
@@ -132,12 +135,50 @@ function KeyPicker({ scale, value, formula, onKeyChange, onFormulaChange }: KeyP
           </option>
         ))}
       </select>
-      <span
-        className={near ? "key-picker__range" : "key-picker__range key-picker__range--out"}
-        title={`The ${formula} formula was fitted on a key with OKLCH L ${fitted}`}
-      >
-        L {lightness.toFixed(2)} · fitted on {fitted.toFixed(2)}
-      </span>
+      <LightnessHint value={value} formula={formula} />
     </div>
+  );
+}
+
+/** How the key's lightness relates to what the selected formula expects. */
+function LightnessHint({ value, formula }: { value: string; formula: Formula }) {
+  const lightness = oklabLightness(value).toFixed(2);
+
+  if (formula === "perceptual-v2") {
+    const { top, bottom } = LADDER_ENDS;
+    const inside = oklabLightness(value) > bottom && oklabLightness(value) < top;
+
+    return (
+      <span
+        className={inside ? "key-picker__range" : "key-picker__range key-picker__range--out"}
+        title={`perceptual-v2 keeps the key exactly at 500 and spaces the other steps evenly toward L ${top} and ${bottom}`}
+      >
+        L {lightness} · key kept · ends {top} / {bottom}
+        {inside ? "" : " · outside, steps fall out of order"}
+      </span>
+    );
+  }
+
+  if (formula === "perceptual") {
+    return (
+      <span
+        className="key-picker__range"
+        title="The perceptual formula keeps only the key's hue and chroma; every 500 sits at the same ladder lightness"
+      >
+        L {lightness} → ladder {LADDER_500_LIGHTNESS.toFixed(2)}
+      </span>
+    );
+  }
+
+  const fitted = FORMULA_KEY_LIGHTNESS[formula];
+  const near = Math.abs(oklabLightness(value) - fitted) <= LIGHTNESS_TOLERANCE;
+
+  return (
+    <span
+      className={near ? "key-picker__range" : "key-picker__range key-picker__range--out"}
+      title={`The ${formula} formula was fitted on a key with OKLCH L ${fitted}`}
+    >
+      L {lightness} · fitted on {fitted.toFixed(2)}
+    </span>
   );
 }

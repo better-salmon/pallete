@@ -1,11 +1,17 @@
 /*
- * Ramp formulas: one per Figma palette, each derived from that palette's 500
- * key alone and fitted only on its own swatches. All three reproduce every
- * Figma hex in tokens.css exactly.
+ * Ramp formulas, each deriving a 50–900 scale from a single 500 key.
  *
- * Usage: put .ramp plus one formula class (.ramp--accent, .ramp--neutral or
- * .ramp--brand) on an element, set --ramp-key on that same element, and read
- * var(--ramp-50) … var(--ramp-900) on it or on its descendants.
+ * accent, neutral, brand — one per Figma palette, fitted only on its own
+ *   swatches; each reproduces every Figma hex in tokens.css exactly.
+ * perceptual — a designed lightness ladder shared by every palette; the 500
+ *   moves to the ladder, so the key keeps only its hue and chroma.
+ * perceptual-v2 — the same idea with the key kept exactly at 500; only the
+ *   50 and 900 lightness are shared.
+ *
+ * Usage: put .ramp plus one formula class (.ramp--accent, .ramp--neutral,
+ * .ramp--brand, .ramp--perceptual or .ramp--perceptual-v2) on an element, set --ramp-key on that
+ * same element, and read var(--ramp-50) … var(--ramp-900) on it or on its
+ * descendants.
  */
 .ramp {
   --ramp-500: var(--ramp-key);
@@ -58,4 +64,73 @@
   --ramp-700: oklch(from var(--ramp-key) calc(l - 0.1) calc(c * 0.84) h);
   --ramp-800: oklch(from var(--ramp-key) calc(l - 0.147) calc(c * 0.755) h);
   --ramp-900: oklch(from var(--ramp-key) calc(l - 0.181) calc(c * 0.69) h);
+}
+
+/*
+ * perceptual: a designed ladder, not fitted to Figma. Every palette that uses
+ * it shares the same OKLCH lightness per step, so e.g. blue-300 and green-300
+ * look equally light.
+ *
+ *   L  fixed per step, evenly spaced in OKLab: 0.97 at 50 down to 0.25 at
+ *      900 in steps of 0.08. The 500 sits at 0.57 whatever the key's lightness.
+ *   C  the key's chroma scaled by min(L / 0.57, (1 − L) / 0.43): 1 at the 500,
+ *      falling linearly to 0 at white and at black. Each step therefore sits
+ *      on the OKLab line white → key → black.
+ *   H  the key's hue.
+ *
+ * Keys far from L 0.57 that are very saturated (bright yellow, say) cannot
+ * keep their chroma at the ladder lightness; the browser clips those steps.
+ */
+.ramp--perceptual {
+  --ramp-50: oklch(from var(--ramp-key) 0.97 calc(c * min(0.97 / 0.57, (1 - 0.97) / 0.43)) h);
+  --ramp-100: oklch(from var(--ramp-key) 0.89 calc(c * min(0.89 / 0.57, (1 - 0.89) / 0.43)) h);
+  --ramp-200: oklch(from var(--ramp-key) 0.81 calc(c * min(0.81 / 0.57, (1 - 0.81) / 0.43)) h);
+  --ramp-300: oklch(from var(--ramp-key) 0.73 calc(c * min(0.73 / 0.57, (1 - 0.73) / 0.43)) h);
+  --ramp-400: oklch(from var(--ramp-key) 0.65 calc(c * min(0.65 / 0.57, (1 - 0.65) / 0.43)) h);
+  --ramp-500: oklch(from var(--ramp-key) 0.57 calc(c * min(0.57 / 0.57, (1 - 0.57) / 0.43)) h);
+  --ramp-600: oklch(from var(--ramp-key) 0.49 calc(c * min(0.49 / 0.57, (1 - 0.49) / 0.43)) h);
+  --ramp-700: oklch(from var(--ramp-key) 0.41 calc(c * min(0.41 / 0.57, (1 - 0.41) / 0.43)) h);
+  --ramp-800: oklch(from var(--ramp-key) 0.33 calc(c * min(0.33 / 0.57, (1 - 0.33) / 0.43)) h);
+  --ramp-900: oklch(from var(--ramp-key) 0.25 calc(c * min(0.25 / 0.57, (1 - 0.25) / 0.43)) h);
+}
+
+/*
+ * perceptual-v2: the key stays exactly at 500; only the ends of the ladder are
+ * shared. Every palette's 50 is OKLCH L 0.97 and its 900 is L 0.25.
+ *
+ *   L  50–400 are evenly spaced in OKLab from the key up to 0.97 (fractions
+ *      0.2 / 0.4 / 0.6 / 0.8 / 1 of the way), 600–900 evenly spaced from the
+ *      key down to 0.25 (0.25 / 0.5 / 0.75 / 1).
+ *   C  the key's chroma, fading linearly to 0 at white for tints
+ *      (× (1 − L) / (1 − l)) and at black for shades (× L / l), so every step
+ *      sits on the OKLab line white → key → black.
+ *   H  the key's hue.
+ *
+ * 100–800 line up across palettes only when their keys have similar
+ * lightness. Steps stay in order only for keys between L 0.25 and 0.97.
+ */
+.ramp--perceptual-v2 {
+  --ramp-50: oklch(from var(--ramp-key) calc(0.97) calc(c * 0.03 / (1 - l)) h);
+  --ramp-100: oklch(
+    from var(--ramp-key) calc(l + (0.97 - l) * 0.8) calc(c * (1 - l - (0.97 - l) * 0.8) / (1 - l)) h
+  );
+  --ramp-200: oklch(
+    from var(--ramp-key) calc(l + (0.97 - l) * 0.6) calc(c * (1 - l - (0.97 - l) * 0.6) / (1 - l)) h
+  );
+  --ramp-300: oklch(
+    from var(--ramp-key) calc(l + (0.97 - l) * 0.4) calc(c * (1 - l - (0.97 - l) * 0.4) / (1 - l)) h
+  );
+  --ramp-400: oklch(
+    from var(--ramp-key) calc(l + (0.97 - l) * 0.2) calc(c * (1 - l - (0.97 - l) * 0.2) / (1 - l)) h
+  );
+  --ramp-600: oklch(
+    from var(--ramp-key) calc(l - (l - 0.25) * 0.25) calc(c * (l - (l - 0.25) * 0.25) / l) h
+  );
+  --ramp-700: oklch(
+    from var(--ramp-key) calc(l - (l - 0.25) * 0.5) calc(c * (l - (l - 0.25) * 0.5) / l) h
+  );
+  --ramp-800: oklch(
+    from var(--ramp-key) calc(l - (l - 0.25) * 0.75) calc(c * (l - (l - 0.25) * 0.75) / l) h
+  );
+  --ramp-900: oklch(from var(--ramp-key) calc(0.25) calc(c * 0.25 / l) h);
 }
